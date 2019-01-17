@@ -57,7 +57,7 @@ class COCOeval:
     # Data, paper, and tutorials available at:  http://mscoco.org/
     # Code written by Piotr Dollar and Tsung-Yi Lin, 2015.
     # Licensed under the Simplified BSD License [see coco/license.txt]
-    def __init__(self, cocoGt=None, cocoDt=None, iouType='segm'):
+    def __init__(self, cocoGt=None, cocoDt=None, iouType='segm', maxDet=100):
         '''
         Initialize CocoEval using coco APIs for gt and dt
         :param cocoGt: coco object with ground truth annotations
@@ -73,7 +73,7 @@ class COCOeval:
         self.eval     = {}                  # accumulated evaluation results
         self._gts = defaultdict(list)       # gt for evaluation
         self._dts = defaultdict(list)       # dt for evaluation
-        self.params = Params(iouType=iouType) # parameters
+        self.params = Params(iouType=iouType, maxDet=maxDet) # parameters
         self._paramsEval = {}               # parameters for evaluation
         self.stats = []                     # result summarization
         self.ious = {}                      # ious between all gts and dts
@@ -500,13 +500,16 @@ class Params:
     '''
     Params for coco evaluation api
     '''
-    def setDetParams(self):
+    def setDetParams(self, maxDet=100):
         self.imgIds = []
         self.catIds = []
         # np.arange causes trouble.  the data point on arange is slightly larger than the true value
         self.iouThrs = np.linspace(.5, 0.95, np.round((0.95 - .5) / .05) + 1, endpoint=True)
         self.recThrs = np.linspace(.0, 1.00, np.round((1.00 - .0) / .01) + 1, endpoint=True)
-        self.maxDets = [1, 10, 100]
+        if maxDet > 100:
+            self.maxDets = [1, 10, 100, maxDet]
+        else:
+            self.maxDets = [1, 10, 100]
         self.areaRng = [[0 ** 2, 1e5 ** 2], [0 ** 2, 32 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
         self.areaRngLbl = ['all', 'small', 'medium', 'large']
         self.useCats = 1
@@ -522,7 +525,7 @@ class Params:
         self.areaRngLbl = ['all', 'medium', 'large']
         self.useCats = 1
 
-    def __init__(self, iouType='segm'):
+    def __init__(self, iouType='segm', maxDet=100):
         if iouType == 'segm' or iouType == 'bbox':
             self.setDetParams()
         elif iouType == 'keypoints':
