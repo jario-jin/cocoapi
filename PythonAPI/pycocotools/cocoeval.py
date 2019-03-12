@@ -428,7 +428,8 @@ class COCOeval:
         '''
         def _summarize( ap=1, iouThr=None, areaRng='all', maxDets=100, useCats=0 ):
             p = self.params
-            iStr = ' {:<18} {} @[ IoU={:<9} | area={:>6s} | maxDets={:>3d} ] = {}'
+            iStrArr = ' {:<18} {} @[ IoU={:<9} | area={:>6s} | maxDets={:>3d} ] = {}'
+            iStr = ' {:<18} {} @[ IoU={:<9} | area={:>6s} | maxDets={:>3d} ] = {:0.3f}'
             titleStr = 'Average Precision' if ap == 1 else 'Average Recall'
             typeStr = '(AP)' if ap==1 else '(AR)'
             iouStr = '{:0.2f}:{:0.2f}'.format(p.iouThrs[0], p.iouThrs[-1]) \
@@ -453,6 +454,7 @@ class COCOeval:
                 s = s[:,:,aind,mind]
             if len(s[s>-1])==0:
                 mean_s = -1
+                print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             else:
                 if ap==1 and useCats==1:
                     # dimension of precision: [TxRxKxAxM]
@@ -460,15 +462,21 @@ class COCOeval:
                     for i in range(s.shape[2]):
                         sc = s[:,:,i,:]
                         mean_s.append(np.mean(sc[sc>-1]))
+                    mean_s = np.array(mean_s)
+                    np.set_printoptions(precision=3, suppress=False)
+                    print(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
                 elif useCats==1:
                     # dimension of recall: [TxKxAxM]
                     mean_s = []
                     for i in range(s.shape[1]):
                         sc = s[:,i,:]
                         mean_s.append(np.mean(sc[sc>-1]))
+                    mean_s = np.array(mean_s)
+                    np.set_printoptions(precision=3, suppress=False)
+                    print(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
                 else:
                     mean_s = np.mean(s[s>-1])
-            print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                    print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             return mean_s
         def _summarizeDets():
             stats = np.zeros((13,))
