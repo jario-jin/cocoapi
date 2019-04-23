@@ -6,6 +6,9 @@ import time
 from collections import defaultdict
 from . import mask as maskUtils
 import copy
+import os
+import pickle
+
 
 class COCOeval:
     # Interface for evaluating detection on the Microsoft COCO dataset.
@@ -57,7 +60,7 @@ class COCOeval:
     # Data, paper, and tutorials available at:  http://mscoco.org/
     # Code written by Piotr Dollar and Tsung-Yi Lin, 2015.
     # Licensed under the Simplified BSD License [see coco/license.txt]
-    def __init__(self, cocoGt=None, cocoDt=None, iouType='segm', maxDet=100):
+    def __init__(self, cocoGt=None, cocoDt=None, iouType='segm', maxDet=100, saveEval=''):
         '''
         Initialize CocoEval using coco APIs for gt and dt
         :param cocoGt: coco object with ground truth annotations
@@ -77,6 +80,7 @@ class COCOeval:
         self.stats = []                     # result summarization
         self.stats_cats = []                # result with categories summarization
         self.ious = {}                      # ious between all gts and dts
+        self.saveEval = saveEval
         if not cocoGt is None:
             self.params.imgIds = sorted(cocoGt.getImgIds())
             self.params.catIds = sorted(cocoGt.getCatIds())
@@ -417,6 +421,10 @@ class COCOeval:
             'recall':   recall,
             'scores': scores,
         }
+        if len(self.saveEval) > 0:
+            f = open(os.path.join(self.saveEval, 'eval.pkl'), 'wb')
+            pickle.dump(self.eval, f)
+            f.close()
         toc = time.time()
         print('DONE (t={:0.2f}s).'.format( toc-tic))
 
