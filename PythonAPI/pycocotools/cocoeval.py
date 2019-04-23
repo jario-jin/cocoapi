@@ -422,7 +422,7 @@ class COCOeval:
             'scores': scores,
         }
         if len(self.saveEval) > 0:
-            f = open(os.path.join(self.saveEval, 'eval.pkl'), 'wb')
+            f = open(os.path.join(self.saveEval, 'cocoapi_eval.pkl'), 'wb')
             pickle.dump(self.eval, f)
             f.close()
         toc = time.time()
