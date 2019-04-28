@@ -8,6 +8,7 @@ from . import mask as maskUtils
 import copy
 import os
 import pickle
+import logging
 
 
 class COCOeval:
@@ -428,7 +429,7 @@ class COCOeval:
         toc = time.time()
         print('DONE (t={:0.2f}s).'.format( toc-tic))
 
-    def summarize(self):
+    def summarize(self, logger=logging.getLogger()):
         '''
         Compute and display summary metrics for evaluation results.
         Note this functin can *only* be applied on the default parameter setting
@@ -462,6 +463,7 @@ class COCOeval:
             if len(s[s>-1])==0:
                 mean_s = -1
                 print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                logger.debug(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             else:
                 if ap==1 and useCats==1:
                     # dimension of precision: [TxRxKxAxM]
@@ -472,6 +474,7 @@ class COCOeval:
                     mean_s = np.array(mean_s)
                     np.set_printoptions(precision=3, suppress=False)
                     print(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                    logger.debug(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
                 elif useCats==1:
                     # dimension of recall: [TxKxAxM]
                     mean_s = []
@@ -481,9 +484,11 @@ class COCOeval:
                     mean_s = np.array(mean_s)
                     np.set_printoptions(precision=3, suppress=False)
                     print(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                    logger.debug(iStrArr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
                 else:
                     mean_s = np.mean(s[s>-1])
                     print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                    logger.debug(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             return mean_s
         def _summarizeDets():
             stats = np.zeros((13,))
