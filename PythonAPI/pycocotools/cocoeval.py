@@ -491,20 +491,28 @@ class COCOeval:
                     logger.debug(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
             return mean_s
         def _summarizeDets():
-            stats = np.zeros((13,))
+            stats = np.zeros((19,))
             stats[0] = _summarize(1, maxDets=self.params.maxDets[-1])
             stats[1] = _summarize(1, iouThr=.5, maxDets=self.params.maxDets[-1])
             stats[2] = _summarize(1, iouThr=.75, maxDets=self.params.maxDets[-1])
             stats[3] = _summarize(1, areaRng='small', maxDets=self.params.maxDets[-1])
             stats[4] = _summarize(1, areaRng='medium', maxDets=self.params.maxDets[-1])
             stats[5] = _summarize(1, areaRng='large', maxDets=self.params.maxDets[-1])
-            stats[6] = _summarize(0, maxDets=self.params.maxDets[0])
-            stats[7] = _summarize(0, maxDets=self.params.maxDets[1])
-            stats[8] = _summarize(0, maxDets=self.params.maxDets[2])
-            stats[9] = _summarize(0, maxDets=self.params.maxDets[-1])
-            stats[10] = _summarize(0, areaRng='small', maxDets=self.params.maxDets[-1])
-            stats[11] = _summarize(0, areaRng='medium', maxDets=self.params.maxDets[-1])
-            stats[12] = _summarize(0, areaRng='large', maxDets=self.params.maxDets[-1])
+
+            stats[6] = _summarize(1, areaRng='0-8', maxDets=self.params.maxDets[-1])
+            stats[7] = _summarize(1, areaRng='8-16', maxDets=self.params.maxDets[-1])
+            stats[8] = _summarize(1, areaRng='16-32', maxDets=self.params.maxDets[-1])
+            stats[9] = _summarize(1, areaRng='32-64', maxDets=self.params.maxDets[-1])
+            stats[10] = _summarize(1, areaRng='64-128', maxDets=self.params.maxDets[-1])
+            stats[11] = _summarize(1, areaRng='128-256', maxDets=self.params.maxDets[-1])
+
+            stats[12] = _summarize(0, maxDets=self.params.maxDets[0])
+            stats[13] = _summarize(0, maxDets=self.params.maxDets[1])
+            stats[14] = _summarize(0, maxDets=self.params.maxDets[2])
+            stats[15] = _summarize(0, maxDets=self.params.maxDets[-1])
+            stats[16] = _summarize(0, areaRng='small', maxDets=self.params.maxDets[-1])
+            stats[17] = _summarize(0, areaRng='medium', maxDets=self.params.maxDets[-1])
+            stats[18] = _summarize(0, areaRng='large', maxDets=self.params.maxDets[-1])
             stats_cats = []
             stats_cats.append(_summarize(1, maxDets=self.params.maxDets[-1], useCats=1))
             stats_cats.append(_summarize(1, iouThr=.5, maxDets=self.params.maxDets[-1], useCats=1))
@@ -544,14 +552,17 @@ class Params:
         self.imgIds = []
         self.catIds = []
         # np.arange causes trouble.  the data point on arange is slightly larger than the true value
-        self.iouThrs = np.linspace(.5, 0.95, np.round((0.95 - .5) / .05) + 1, endpoint=True)
-        self.recThrs = np.linspace(.0, 1.00, np.round((1.00 - .0) / .01) + 1, endpoint=True)
+        self.iouThrs = np.linspace(.5, 0.95, int(np.round((0.95 - .5) / .05) + 1), endpoint=True)
+        self.recThrs = np.linspace(.0, 1.00, int(np.round((1.00 - .0) / .01) + 1), endpoint=True)
         if maxDet > 100:
             self.maxDets = [1, 10, 100, maxDet]
         else:
             self.maxDets = [1, 10, 100]
-        self.areaRng = [[0 ** 2, 1e5 ** 2], [0 ** 2, 32 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2]]
-        self.areaRngLbl = ['all', 'small', 'medium', 'large']
+        self.areaRng = [[0 ** 2, 1e5 ** 2], [0 ** 2, 32 ** 2], [32 ** 2, 96 ** 2], [96 ** 2, 1e5 ** 2], 
+            [0 ** 2, 8 ** 2], [8 ** 2, 16 ** 2], [16 ** 2, 32 ** 2], [32 ** 2, 64 ** 2], [64 ** 2, 128 ** 2],
+            [128 ** 2, 256 ** 2]]
+        self.areaRngLbl = ['all', 'small', 'medium', 'large', '0-8', '8-16', '16-32', '32-64', '64-128',
+                           '128-256']
         self.useCats = 1
 
     def setKpParams(self):
